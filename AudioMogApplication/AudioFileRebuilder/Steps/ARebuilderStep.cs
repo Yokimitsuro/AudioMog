@@ -22,7 +22,9 @@ namespace AudioMog.Application.AudioFileRebuilder.Steps
 
 		protected bool WriteUintIfMatch(byte[] bytes, int offset, uint matchValue, uint writeValue)
 		{
-			var matches = ReadUint(bytes, offset) == matchValue;
+			if (!TryReadUint(bytes, offset, out uint actualValue))
+				return false;
+			var matches = actualValue == matchValue;
 			if (matches)
 				WriteUint(bytes, offset, writeValue);
 			return matches;
@@ -31,6 +33,15 @@ namespace AudioMog.Application.AudioFileRebuilder.Steps
 		protected uint ReadUint(byte[] bytes, int offset)
 		{
 			return BitConverter.ToUInt32(bytes, offset);
+		}
+		
+		protected bool TryReadUint(byte[] bytes, int offset, out uint value)
+		{
+			value = 0;
+			if (offset < 0 || offset + 4 > bytes.Length)
+				return false;
+			value = BitConverter.ToUInt32(bytes, offset);
+			return true;
 		}
 	}
 }
